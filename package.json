@@ -1,0 +1,14 @@
+{
+  "name": "dinesphere-workspace",
+  "version": "1.0.0",
+  "description": "DineSphere - Restaurant Management System",
+  "scripts": {
+    "dev": "node -e \"const { spawn } = require('child_process'); spawn('npm', ['--prefix', 'server', 'run', 'dev'], { stdio: 'inherit', shell: true }); spawn('npm', ['--prefix', 'client', 'run', 'dev'], { stdio: 'inherit', shell: true });\"",
+    "dev:client": "npm --prefix client run dev",
+    "dev:server": "npm --prefix server run dev",
+    "start": "npm run dev",
+    "build:server": "npm --prefix server run build",
+    "build:client": "npm --prefix client run build",
+    "build": "npm --prefix server run build && npm --prefix client run build"
+  }
+}
