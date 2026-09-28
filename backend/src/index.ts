@@ -5,7 +5,7 @@ import path from 'path';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import adminRouter from './admin';
+import adminRouter, { requireAdmin } from './admin';
 import { seedAdminData } from './adminSeed';
 
 dotenv.config();
@@ -204,7 +204,6 @@ app.post('/api/auth/login', async (req, res) => {
 
     const input = email.trim().toLowerCase();
 
-    // Look up user by email, by email@dinesphere.test, or if input matches ADMIN_ID and role is ADMIN
     const user = await prisma.user.findFirst({
       where: {
         OR: [
@@ -229,7 +228,14 @@ app.post('/api/auth/login', async (req, res) => {
       failedLoginAttempts.set(clientIp, cur);
       return res.status(400).json({
         success: false,
-        message: `Invalid credentials. (${cur.count}/${maxAttempts} attempts used)`
+        message: `Invalid email or password. (${cur.count}/${maxAttempts} attempts used)`
+      });
+    }
+
+    if (user.role === 'ADMIN' || user.role === 'MANAGER' || user.role === 'KITCHEN') {
+      return res.status(403).json({
+        success: false,
+        message: 'Please use the admin login page'
       });
     }
 
@@ -248,7 +254,7 @@ app.post('/api/auth/login', async (req, res) => {
       failedLoginAttempts.set(clientIp, cur);
       return res.status(400).json({
         success: false,
-        message: `Invalid credentials. (${cur.count}/${maxAttempts} attempts used)`
+        message: `Invalid email or password. (${cur.count}/${maxAttempts} attempts used)`
       });
     }
 
@@ -275,6 +281,107 @@ app.post('/api/auth/login', async (req, res) => {
     });
   } catch (error) {
     console.error('Login error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+app.post('/api/auth/admin/login', async (req, res) => {
+  try {
+    const clientIp = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || 'local';
+    const record = failedLoginAttempts.get(clientIp);
+    const maxAttempts = 5;
+
+    if (record && record.lockUntil > Date.now()) {
+      const remainingMinutes = Math.ceil((record.lockUntil - Date.now()) / 60000);
+      return res.status(429).json({
+        success: false,
+        message: `Account locked due to multiple failed login attempts. Please try again in ${remainingMinutes} minute(s).`
+      });
+    }
+
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ success: false, message: 'Email/ID and password are required' });
+    }
+
+    const input = email.trim().toLowerCase();
+
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: input },
+          { email: `${input}@dinesphere.test` },
+          ...(input === (ADMIN_ID || 'admin').toLowerCase() ? [{ role: 'ADMIN' }] : [])
+        ]
+      }
+    });
+
+    if (!user) {
+      const cur = failedLoginAttempts.get(clientIp) || { count: 0, lockUntil: 0 };
+      cur.count += 1;
+      if (cur.count >= maxAttempts) {
+        cur.lockUntil = Date.now() + 15 * 60 * 1000;
+        failedLoginAttempts.set(clientIp, cur);
+        return res.status(429).json({
+          success: false,
+          message: `Too many failed login attempts (${cur.count}/${maxAttempts}). Locked for 15 minutes.`
+        });
+      }
+      failedLoginAttempts.set(clientIp, cur);
+      return res.status(400).json({
+        success: false,
+        message: `Invalid email or password. (${cur.count}/${maxAttempts} attempts used)`
+      });
+    }
+
+    if (user.role !== 'ADMIN' && user.role !== 'MANAGER' && user.role !== 'KITCHEN') {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized for admin access.'
+      });
+    }
+
+    const validPassword = await bcrypt.compare(password, user.password);
+    if (!validPassword) {
+      const cur = failedLoginAttempts.get(clientIp) || { count: 0, lockUntil: 0 };
+      cur.count += 1;
+      if (cur.count >= maxAttempts) {
+        cur.lockUntil = Date.now() + 15 * 60 * 1000;
+        failedLoginAttempts.set(clientIp, cur);
+        return res.status(429).json({
+          success: false,
+          message: `Too many failed login attempts (${cur.count}/${maxAttempts}). Locked for 15 minutes.`
+        });
+      }
+      failedLoginAttempts.set(clientIp, cur);
+      return res.status(400).json({
+        success: false,
+        message: `Invalid email or password. (${cur.count}/${maxAttempts} attempts used)`
+      });
+    }
+
+    if (user.is_active === false) {
+      return res.status(403).json({
+        success: false,
+        message: 'Your account has been deactivated. Please contact restaurant support.'
+      });
+    }
+
+    failedLoginAttempts.delete(clientIp);
+
+    const token = jwt.sign(
+      { id: user.id, email: user.email, role: user.role, name: user.name },
+      JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
+    res.json({
+      success: true,
+      data: { user: { id: user.id, name: user.name, email: user.email, role: user.role }, token },
+      message: 'Login successful'
+    });
+  } catch (error) {
+    console.error('Admin Login error:', error);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 });
@@ -329,7 +436,7 @@ app.get('/api/menu/:id', async (req, res) => {
 });
 
 // Admin Menu Management
-app.post('/api/menu', authenticateToken, authorizeRole(['ADMIN', 'MANAGER']), async (req, res) => {
+app.post('/api/menu', requireAdmin, async (req, res) => {
   try {
     const newItem = await prisma.menuItem.create({ data: req.body });
     res.json({ success: true, data: newItem, message: 'Item created' });
@@ -338,7 +445,7 @@ app.post('/api/menu', authenticateToken, authorizeRole(['ADMIN', 'MANAGER']), as
   }
 });
 
-app.put('/api/menu/:id', authenticateToken, authorizeRole(['ADMIN', 'MANAGER']), async (req, res) => {
+app.put('/api/menu/:id', requireAdmin, async (req, res) => {
   try {
     const updated = await prisma.menuItem.update({ where: { id: req.params.id }, data: req.body });
     res.json({ success: true, data: updated, message: 'Item updated' });
@@ -347,7 +454,7 @@ app.put('/api/menu/:id', authenticateToken, authorizeRole(['ADMIN', 'MANAGER']),
   }
 });
 
-app.delete('/api/menu/:id', authenticateToken, authorizeRole(['ADMIN', 'MANAGER']), async (req, res) => {
+app.delete('/api/menu/:id', requireAdmin, async (req, res) => {
   try {
     await prisma.menuItem.update({ where: { id: req.params.id }, data: { isActive: false } });
     res.json({ success: true, data: null, message: 'Item deleted (soft)' });
@@ -437,7 +544,7 @@ app.patch('/api/orders/:id/status', authenticateToken, authorizeRole(['ADMIN', '
 // -------------------------------------------------------------
 // DASHBOARD & REPORTS (ADMIN)
 // -------------------------------------------------------------
-app.get('/api/reports/sales', authenticateToken, authorizeRole(['ADMIN', 'MANAGER']), async (req, res) => {
+app.get('/api/reports/sales', requireAdmin, async (req, res) => {
   try {
     const orders = await prisma.order.findMany({ where: { status: 'COMPLETED' } });
     const revenue = orders.reduce((sum, order) => sum + order.total, 0);
@@ -459,7 +566,7 @@ app.get('/api/reports/sales', authenticateToken, authorizeRole(['ADMIN', 'MANAGE
 });
 
 // Customers endpoint for Admin dashboard
-app.get('/api/admin/customers', authenticateToken, authorizeRole(['ADMIN', 'MANAGER']), async (req, res) => {
+app.get('/api/admin/customers', requireAdmin, async (req, res) => {
   try {
     const customers = await prisma.user.findMany({
       where: { role: 'CUSTOMER' },

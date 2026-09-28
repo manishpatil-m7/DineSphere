@@ -20,23 +20,15 @@ const Login: React.FC = () => {
     e.preventDefault();
     setError('');
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || "http://localhost:5000"}`}/api/auth/login`, { email, password });
+      const res = await axios.post(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/auth/login`, { email, password });
       localStorage.setItem('token', res.data.data.token);
       localStorage.setItem('user', JSON.stringify(res.data.data.user));
       
-      const role = res.data.data.user.role;
-      if (role === 'ADMIN' || role === 'MANAGER') {
-        navigate('/admin');
-      } else if (role === 'KITCHEN') {
-        navigate('/kitchen');
-      } else {
-        navigate('/dashboard');
-      }
+      navigate('/dashboard');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Login failed. Note: Ensure the backend is running.');
     }
   };
-
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-[#0C0C0C]">

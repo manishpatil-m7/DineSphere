@@ -19,16 +19,12 @@ const AdminLogin: React.FC = () => {
     e.preventDefault();
     setError('');
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || "http://localhost:5000"}`}/api/auth/login`, {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/auth/admin/login`, {
         email: adminId,
         password
       });
 
       const user = res.data.data.user;
-      if (user.role !== 'ADMIN' && user.role !== 'MANAGER') {
-        setError('Access denied: You do not have administrator permissions.');
-        return;
-      }
 
       localStorage.setItem('token', res.data.data.token);
       localStorage.setItem('user', JSON.stringify(user));
