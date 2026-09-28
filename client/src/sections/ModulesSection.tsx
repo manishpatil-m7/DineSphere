@@ -60,11 +60,13 @@ const ModuleCard = ({ module, index }: { module: ModuleData; index: number }) =>
       <motion.div
         style={{
           scale,
-          top: `${index * 28}px`,
+          top: `calc(10vh + ${index * 28}px)`,
         }}
         className="
-          sticky top-24 md:top-32
+          sticky
           w-full
+          h-[75vh] sm:h-[80vh]
+          flex flex-col
           rounded-[40px] sm:rounded-[50px] md:rounded-[60px]
           border-2 border-[#D7E2EA]
           bg-[#0C0C0C]
@@ -103,30 +105,27 @@ const ModuleCard = ({ module, index }: { module: ModuleData; index: number }) =>
         </div>
 
         {/* ── Image grid ── */}
-        <div className="flex gap-3 sm:gap-4">
+        <div className="flex gap-3 sm:gap-4 flex-1 min-h-0">
           {/* Left column (40%) — 2 stacked */}
           <div className="w-[40%] flex flex-col gap-3 sm:gap-4">
             <img
               src={module.images.col1Top}
               alt={`${module.name} view 1`}
-              className="w-full rounded-[24px] sm:rounded-[32px] md:rounded-[40px] object-cover bg-[#1a1a1a]"
-              style={{ height: 'clamp(130px, 16vw, 230px)' }}
+              className="w-full flex-[2] min-h-0 rounded-[24px] sm:rounded-[32px] md:rounded-[40px] object-cover bg-[#1a1a1a]"
             />
             <img
               src={module.images.col1Bottom}
               alt={`${module.name} view 2`}
-              className="w-full rounded-[24px] sm:rounded-[32px] md:rounded-[40px] object-cover bg-[#1a1a1a]"
-              style={{ height: 'clamp(160px, 22vw, 340px)' }}
+              className="w-full flex-[3] min-h-0 rounded-[24px] sm:rounded-[32px] md:rounded-[40px] object-cover bg-[#1a1a1a]"
             />
           </div>
 
           {/* Right column (60%) — 1 tall */}
-          <div className="w-[60%]">
+          <div className="w-[60%] h-full">
             <img
               src={module.images.col2}
               alt={`${module.name} view 3`}
               className="w-full h-full rounded-[24px] sm:rounded-[32px] md:rounded-[40px] object-cover bg-[#1a1a1a]"
-              style={{ minHeight: 'clamp(290px, 38vw, 580px)' }}
             />
           </div>
         </div>
