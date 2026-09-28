@@ -50,17 +50,26 @@ export const FloorMap: React.FC<FloorMapProps> = ({
     return () => el.removeEventListener('wheel', handleWheel);
   }, []);
 
-  // Zones configuration
-  const zones: Array<{
+  // Zones configuration with dynamic rows based on actual tables
+  const defaultZones: Array<{
     name: 'Lounge' | 'Window' | 'Family' | 'Regular';
     fee: number;
-    rows: string[];
+    defaultRows: string[];
   }> = [
-    { name: 'Lounge', fee: 300, rows: ['A', 'B'] },
-    { name: 'Window', fee: 200, rows: ['C', 'D'] },
-    { name: 'Family', fee: 100, rows: ['E', 'F'] },
-    { name: 'Regular', fee: 0, rows: ['G', 'H'] }
+    { name: 'Lounge', fee: 300, defaultRows: ['A', 'B'] },
+    { name: 'Window', fee: 200, defaultRows: ['C', 'D'] },
+    { name: 'Family', fee: 100, defaultRows: ['E', 'F'] },
+    { name: 'Regular', fee: 0, defaultRows: ['G', 'H'] }
   ];
+
+  const zones = defaultZones.map(z => {
+    const zoneTables = tables.filter(t => t.zone === z.name);
+    let rows = Array.from(new Set(zoneTables.map(t => t.row_label))).sort();
+    if (rows.length === 0) {
+      rows = z.defaultRows; // fallback to show the empty layout
+    }
+    return { ...z, rows };
+  });
 
   return (
     <div className="relative bg-[#0d0d0d] border border-white/10 rounded-3xl p-4 sm:p-6 my-6 overflow-hidden shadow-2xl">
