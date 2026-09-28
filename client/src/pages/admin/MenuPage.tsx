@@ -143,6 +143,13 @@ export const MenuPage: React.FC = () => {
     }
   };
 
+  const handleRemoveImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+    // If editing a dish, we keep it null so the backend knows to clear or ignore it depending on logic
+    // But typically this just clears the new upload
+  };
+
   const handleToggleAvailability = async (dish: AdminDish) => {
     try {
       await adminApi.updateDishAvailability(dish.id, !dish.is_available);
@@ -668,11 +675,21 @@ export const MenuPage: React.FC = () => {
                 </label>
                 <div className="flex items-center gap-4">
                   {imagePreview && (
-                    <img
-                      src={imagePreview}
-                      alt="Preview"
-                      className="w-20 h-20 rounded-2xl object-cover border border-[#D7E2EA]/30"
-                    />
+                    <div className="relative group">
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="w-20 h-20 rounded-2xl object-cover border border-[#D7E2EA]/30"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleRemoveImage}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                        title="Remove Image"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
                   )}
                   <input
                     type="file"
