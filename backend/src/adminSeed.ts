@@ -184,14 +184,16 @@ export async function seedAdminData(prisma: PrismaClient) {
       }
     ];
 
-    const existingIngCount = await prisma.dishIngredient.count();
-    if (existingIngCount === 0) {
-      for (const recipe of recipeDefinitions) {
-        const dishId = dishMap.get(recipe.dishName);
-        if (dishId) {
-          for (const ing of recipe.ingredients) {
-            const itemId = inventoryIdMap[ing.itemName];
-            if (itemId) {
+    for (const recipe of recipeDefinitions) {
+      const dishId = dishMap.get(recipe.dishName);
+      if (dishId) {
+        for (const ing of recipe.ingredients) {
+          const itemId = inventoryIdMap[ing.itemName];
+          if (itemId) {
+            const existingLink = await prisma.dishIngredient.findFirst({
+              where: { dish_id: dishId, item_id: itemId }
+            });
+            if (!existingLink) {
               await prisma.dishIngredient.create({
                 data: {
                   dish_id: dishId,
@@ -203,8 +205,8 @@ export async function seedAdminData(prisma: PrismaClient) {
           }
         }
       }
-      console.log('[ADMIN SEED] Linked recipe ingredients to 10 signature dishes');
     }
+    console.log('[ADMIN SEED] Verified dish-ingredient links for basic recipes');
 
     // 5. Table Blocks (2 blocks)
     const existingBlocks = await prisma.tableBlock.count();

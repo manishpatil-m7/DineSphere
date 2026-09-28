@@ -2001,129 +2001,129 @@ async function firstRunSetup() {
         console.log('[DEV SEED] Demo customer already exists: demo@dinesphere.test');
       }
 
-      // Seed 12 Dishes if table is empty
-      const dishCount = await prisma.dish.count();
-      if (dishCount === 0) {
-        const initialDishes = [
-          // Starters
-          {
-            name: 'Crispy Truffle Arancini',
-            description: 'Golden fried arborio risotto balls infused with black truffle oil and molten mozzarella core.',
-            category: 'Starters',
-            price: 320,
-            is_veg: true,
-            rating: 4.8,
-            image_url: 'https://images.unsplash.com/photo-1541529086526-db283c563270?w=600&auto=format&fit=crop&q=80'
-          },
-          {
-            name: 'Smoked Salmon Bruschetta',
-            description: 'Toasted sourdough slices topped with smoked Atlantic salmon, capers, and dill crème fraîche.',
-            category: 'Starters',
-            price: 450,
-            is_veg: false,
-            rating: 4.9,
-            image_url: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=600&auto=format&fit=crop&q=80'
-          },
-          {
-            name: 'Spicy Peri-Peri Paneer Bites',
-            description: 'Tender cottage cheese cubes tossed in chef’s fiery peri-peri glaze with fresh herbs.',
-            category: 'Starters',
-            price: 280,
-            is_veg: true,
-            rating: 4.6,
-            image_url: 'https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8?w=600&auto=format&fit=crop&q=80'
-          },
-          // Main Course
-          {
-            name: 'Saffron Butter Chicken',
-            description: 'Charcoal-smoked chicken simmered in rich velvety tomato and Kashmiri saffron gravy.',
-            category: 'Main Course',
-            price: 520,
-            is_veg: false,
-            rating: 4.9,
-            image_url: 'https://images.unsplash.com/photo-1588166524941-3bf61a9c41db?w=600&auto=format&fit=crop&q=80'
-          },
-          {
-            name: 'Wild Forest Mushroom Risotto',
-            description: 'Slow-cooked Italian carnaroli rice with porcini mushrooms, parmesan crisp, and herb oil.',
-            category: 'Main Course',
-            price: 480,
-            is_veg: true,
-            rating: 4.7,
-            image_url: 'https://images.unsplash.com/photo-1633964913295-ceb43826e7c9?w=600&auto=format&fit=crop&q=80'
-          },
-          {
-            name: 'Grilled Lamb Chops Rosemary',
-            description: 'Tender Australian lamb cutlets seared with rosemary jus, served with roasted garlic mash.',
-            category: 'Main Course',
-            price: 680,
-            is_veg: false,
-            rating: 4.9,
-            image_url: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=600&auto=format&fit=crop&q=80'
-          },
-          // Desserts
-          {
-            name: 'Molten Valrhona Lava Cake',
-            description: 'Warm 70% dark chocolate fondant served with artisan Madagascar vanilla bean gelato.',
-            category: 'Desserts',
-            price: 340,
-            is_veg: true,
-            rating: 4.9,
-            image_url: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=600&auto=format&fit=crop&q=80'
-          },
-          {
-            name: 'Pistachio Matcha Tiramisu',
-            description: 'Espresso and ceremonial matcha-soaked ladyfingers layered with whipped mascarpone.',
-            category: 'Desserts',
-            price: 320,
-            is_veg: true,
-            rating: 4.7,
-            image_url: 'https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=600&auto=format&fit=crop&q=80'
-          },
-          {
-            name: 'Classic Crème Brûlée',
-            description: 'Silky Madagascar vanilla bean custard finished with a crisp hand-torched caramelized sugar crust.',
-            category: 'Desserts',
-            price: 290,
-            is_veg: true,
-            rating: 4.8,
-            image_url: 'https://images.unsplash.com/photo-1470124182917-cc6e71b22ecc?w=600&auto=format&fit=crop&q=80'
-          },
-          // Drinks
-          {
-            name: 'Smoked Berry Old Fashioned',
-            description: 'Handcrafted signature mocktail with muddled wild blackberries, aromatic bitters, and smoked rosemary.',
-            category: 'Drinks',
-            price: 260,
-            is_veg: true,
-            rating: 4.8,
-            image_url: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=600&auto=format&fit=crop&q=80'
-          },
-          {
-            name: 'Royal Mango Cardamom Lassi',
-            description: 'Thick Alphonso mango yogurt blend infused with roasted green cardamom and toasted pistachio nibs.',
-            category: 'Drinks',
-            price: 190,
-            is_veg: true,
-            rating: 4.7,
-            image_url: 'https://images.unsplash.com/photo-1553530666-ba11a7da3888?w=600&auto=format&fit=crop&q=80'
-          },
-          {
-            name: 'Cold Brew Nitro Tonic',
-            description: 'Single-origin Arabica nitro cold brew topped with sparkling citrus botanical tonic.',
-            category: 'Drinks',
-            price: 220,
-            is_veg: true,
-            rating: 4.6,
-            image_url: 'https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?w=600&auto=format&fit=crop&q=80'
-          }
-        ];
+      // Ensure basic 12 Dishes exist
+      const initialDishes = [
+        // Starters
+        {
+          name: 'Crispy Truffle Arancini',
+          description: 'Golden fried arborio risotto balls infused with black truffle oil and molten mozzarella core.',
+          category: 'Starters',
+          price: 320,
+          is_veg: true,
+          rating: 4.8,
+          image_url: 'https://images.unsplash.com/photo-1541529086526-db283c563270?w=600&auto=format&fit=crop&q=80'
+        },
+        {
+          name: 'Smoked Salmon Bruschetta',
+          description: 'Toasted sourdough slices topped with smoked Atlantic salmon, capers, and dill crème fraîche.',
+          category: 'Starters',
+          price: 450,
+          is_veg: false,
+          rating: 4.9,
+          image_url: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=600&auto=format&fit=crop&q=80'
+        },
+        {
+          name: 'Spicy Peri-Peri Paneer Bites',
+          description: 'Tender cottage cheese cubes tossed in chef’s fiery peri-peri glaze with fresh herbs.',
+          category: 'Starters',
+          price: 280,
+          is_veg: true,
+          rating: 4.6,
+          image_url: 'https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8?w=600&auto=format&fit=crop&q=80'
+        },
+        // Main Course
+        {
+          name: 'Saffron Butter Chicken',
+          description: 'Charcoal-smoked chicken simmered in rich velvety tomato and Kashmiri saffron gravy.',
+          category: 'Main Course',
+          price: 520,
+          is_veg: false,
+          rating: 4.9,
+          image_url: 'https://images.unsplash.com/photo-1588166524941-3bf61a9c41db?w=600&auto=format&fit=crop&q=80'
+        },
+        {
+          name: 'Wild Forest Mushroom Risotto',
+          description: 'Slow-cooked Italian carnaroli rice with porcini mushrooms, parmesan crisp, and herb oil.',
+          category: 'Main Course',
+          price: 480,
+          is_veg: true,
+          rating: 4.7,
+          image_url: 'https://images.unsplash.com/photo-1633964913295-ceb43826e7c9?w=600&auto=format&fit=crop&q=80'
+        },
+        {
+          name: 'Grilled Lamb Chops Rosemary',
+          description: 'Tender Australian lamb cutlets seared with rosemary jus, served with roasted garlic mash.',
+          category: 'Main Course',
+          price: 680,
+          is_veg: false,
+          rating: 4.9,
+          image_url: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=600&auto=format&fit=crop&q=80'
+        },
+        // Desserts
+        {
+          name: 'Molten Valrhona Lava Cake',
+          description: 'Warm 70% dark chocolate fondant served with artisan Madagascar vanilla bean gelato.',
+          category: 'Desserts',
+          price: 340,
+          is_veg: true,
+          rating: 4.9,
+          image_url: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=600&auto=format&fit=crop&q=80'
+        },
+        {
+          name: 'Pistachio Matcha Tiramisu',
+          description: 'Espresso and ceremonial matcha-soaked ladyfingers layered with whipped mascarpone.',
+          category: 'Desserts',
+          price: 320,
+          is_veg: true,
+          rating: 4.7,
+          image_url: 'https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=600&auto=format&fit=crop&q=80'
+        },
+        {
+          name: 'Classic Crème Brûlée',
+          description: 'Silky Madagascar vanilla bean custard finished with a crisp hand-torched caramelized sugar crust.',
+          category: 'Desserts',
+          price: 290,
+          is_veg: true,
+          rating: 4.8,
+          image_url: 'https://images.unsplash.com/photo-1470124182917-cc6e71b22ecc?w=600&auto=format&fit=crop&q=80'
+        },
+        // Drinks
+        {
+          name: 'Smoked Berry Old Fashioned',
+          description: 'Handcrafted signature mocktail with muddled wild blackberries, aromatic bitters, and smoked rosemary.',
+          category: 'Drinks',
+          price: 260,
+          is_veg: true,
+          rating: 4.8,
+          image_url: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=600&auto=format&fit=crop&q=80'
+        },
+        {
+          name: 'Royal Mango Cardamom Lassi',
+          description: 'Thick Alphonso mango yogurt blend infused with roasted green cardamom and toasted pistachio nibs.',
+          category: 'Drinks',
+          price: 190,
+          is_veg: true,
+          rating: 4.7,
+          image_url: 'https://images.unsplash.com/photo-1553530666-ba11a7da3888?w=600&auto=format&fit=crop&q=80'
+        },
+        {
+          name: 'Cold Brew Nitro Tonic',
+          description: 'Single-origin Arabica nitro cold brew topped with sparkling citrus botanical tonic.',
+          category: 'Drinks',
+          price: 220,
+          is_veg: true,
+          rating: 4.6,
+          image_url: 'https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?w=600&auto=format&fit=crop&q=80'
+        }
+      ];
 
-        for (const dish of initialDishes) {
+      for (const dish of initialDishes) {
+        const existing = await prisma.dish.findFirst({ where: { name: dish.name } });
+        if (!existing) {
           await prisma.dish.create({ data: dish });
         }
-        console.log('[DEV SEED] Created 12 initial restaurant dishes');
       }
+      console.log('[DEV SEED] Verified 12 basic restaurant dishes');
 
       // Seed Dining Tables (8 tables)
       const tableCount = await prisma.diningTable.count();
