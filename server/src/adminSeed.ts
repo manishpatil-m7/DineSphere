@@ -3,6 +3,28 @@ import bcrypt from 'bcrypt';
 
 export async function seedAdminData(prisma: PrismaClient) {
   try {
+    // 0. Create Admin User if none exists
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@dinesphere.test';
+    const adminPassword = process.env.ADMIN_PASSWORD;
+
+    if (adminPassword) {
+      const existingAdmin = await prisma.user.findFirst({ where: { role: 'ADMIN' } });
+      if (!existingAdmin) {
+        const hashedPassword = await bcrypt.hash(adminPassword, 10);
+        await prisma.user.create({
+          data: {
+            name: 'System Admin',
+            email: adminEmail.trim().toLowerCase(),
+            password: hashedPassword,
+            role: 'ADMIN'
+          }
+        });
+        console.log('[ADMIN SEED] Created default admin user from environment variables.');
+      }
+    } else {
+      console.log('[ADMIN SEED] ADMIN_PASSWORD not set. Skipping admin user creation.');
+    }
+
     // 1. Settings (single row)
     const existingSettings = await prisma.restaurantSetting.findFirst();
     if (!existingSettings) {
