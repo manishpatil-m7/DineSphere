@@ -26,8 +26,8 @@ const AdminLogin: React.FC = () => {
 
       const user = res.data.data.user;
 
-      localStorage.setItem('token', res.data.data.token);
-      localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem('adminToken', res.data.data.token);
+      localStorage.setItem('adminUser', JSON.stringify(user));
       navigate('/admin');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Admin authentication failed');

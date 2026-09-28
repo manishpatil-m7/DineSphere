@@ -24,7 +24,7 @@ const adminClient = axios.create({
 });
 
 adminClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('adminToken');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -35,8 +35,8 @@ adminClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+      localStorage.removeItem('adminToken');
+      localStorage.removeItem('adminUser');
       if (window.location.pathname.startsWith('/admin') && window.location.pathname !== '/admin/login') {
         window.location.href = '/admin/login';
       }
@@ -191,12 +191,12 @@ export const adminApi = {
   getCustomers: (params?: { search?: string; status?: string; page?: number; limit?: number }) =>
     axios.get<{ success: boolean; data: { customers: AdminCustomer[]; pagination: any } }>(
       `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/customers`, 
-      { params, headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
+      { params, headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` } }
     ),
   getCustomer: (id: string) =>
     axios.get<{ success: boolean; data: any }>(
       `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/customers/${id}`,
-      { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
+      { headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` } }
     ),
   toggleCustomer: (id: string) =>
     adminClient.patch<{ success: boolean; data: AdminCustomer; message: string }>(`/customers/${id}/toggle`),

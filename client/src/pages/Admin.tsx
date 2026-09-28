@@ -32,8 +32,8 @@ const Admin: React.FC = () => {
   ];
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const userStr = localStorage.getItem('user');
+    const token = localStorage.getItem('adminToken');
+    const userStr = localStorage.getItem('adminUser');
 
     if (!token || !userStr) {
       navigate('/admin/login');
@@ -84,8 +84,8 @@ const Admin: React.FC = () => {
   }, [navigate]);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminUser');
     navigate('/admin/login');
   };
 

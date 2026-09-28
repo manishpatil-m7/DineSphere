@@ -19,7 +19,7 @@ const Kitchen: React.FC = () => {
 
   const fetchOrders = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('adminToken');
       if (!token) return navigate('/login');
       
       const res = await axios.get(`${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || "http://localhost:5000"}`}/api/orders`, {
@@ -46,7 +46,7 @@ const Kitchen: React.FC = () => {
 
   const updateStatus = async (id: string, status: string) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('adminToken');
       await axios.patch(`${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || "http://localhost:5000"}`}/api/orders/${id}/status`, { status }, {
         headers: { Authorization: `Bearer ${token}` }
       });

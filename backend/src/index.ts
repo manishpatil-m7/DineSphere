@@ -511,7 +511,7 @@ app.get('/api/orders', authenticateToken, async (req: any, res) => {
     let orders;
     if (['ADMIN', 'MANAGER', 'KITCHEN'].includes(req.user.role)) {
       orders = await prisma.order.findMany({
-        include: { items: { include: { menuItem: true } }, user: true, table: true },
+        include: { items: { include: { menuItem: true } }, user: { select: { id: true, name: true, email: true, phone: true } }, table: true },
         orderBy: { createdAt: 'desc' }
       });
     } else {
@@ -1564,7 +1564,7 @@ app.post('/api/reservations/:id/reschedule', authenticateToken, async (req: any,
 });
 
 // 10. Admin Reservation Endpoints
-app.get('/api/admin/reservations', authenticateToken, authorizeRole(['ADMIN', 'MANAGER']), async (req, res) => {
+app.get('/api/admin/reservations', requireAdmin, async (req, res) => {
   try {
     const { date } = req.query;
     const where: any = {};
@@ -1598,7 +1598,7 @@ app.get('/api/admin/reservations', authenticateToken, authorizeRole(['ADMIN', 'M
   }
 });
 
-app.patch('/api/admin/reservations/:id', authenticateToken, authorizeRole(['ADMIN', 'MANAGER']), async (req, res) => {
+app.patch('/api/admin/reservations/:id', requireAdmin, async (req, res) => {
   try {
     const { status } = req.body;
     if (!status || !['Completed', 'Cancelled', 'Confirmed'].includes(status)) {
@@ -1778,7 +1778,7 @@ app.get('/api/customer/reviews', async (req, res) => {
       orderBy: { created_at: 'desc' }
     });
     const userIds = Array.from(new Set(reviews.map(r => r.user_id)));
-    const users = await prisma.user.findMany({ where: { id: { in: userIds } } });
+    const users = await prisma.user.findMany({ where: { id: { in: userIds } }, select: { id: true, name: true } });
     const userMap = new Map(users.map(u => [u.id, u.name]));
 
     const enriched = reviews.map(r => ({

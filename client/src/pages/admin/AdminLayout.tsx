@@ -48,8 +48,8 @@ export const AdminLayout: React.FC = () => {
 
   // Verify Admin Authentication
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const userStr = localStorage.getItem('user');
+    const token = localStorage.getItem('adminToken');
+    const userStr = localStorage.getItem('adminUser');
     if (!token || !userStr) {
       navigate('/admin/login');
       return;
@@ -145,8 +145,8 @@ export const AdminLayout: React.FC = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminUser');
     navigate('/admin/login');
   };
 
