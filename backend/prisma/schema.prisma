@@ -16,6 +16,7 @@ model User {
   name         String
   email        String   @unique
   phone        String?
+  address      String?
   password     String
   role         String   @default("CUSTOMER") // ADMIN, MANAGER, KITCHEN, DELIVERY, CUSTOMER
   photo_url    String?

@@ -390,10 +390,50 @@ app.get('/api/auth/me', authenticateToken, async (req: any, res) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.user.id },
-      select: { id: true, name: true, email: true, phone: true, role: true }
+      select: { id: true, name: true, email: true, phone: true, address: true, role: true }
     });
     res.json({ success: true, data: user, message: 'Profile fetched' });
   } catch (error) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+app.patch('/api/me', authenticateToken, async (req: any, res) => {
+  try {
+    let { name, phone, address } = req.body;
+    
+    // Trim strings
+    if (typeof name === 'string') name = name.trim();
+    if (typeof phone === 'string') phone = phone.trim();
+    if (typeof address === 'string') address = address.trim();
+
+    // Basic validation
+    if (name !== undefined && name.length === 0) {
+      return res.status(400).json({ success: false, message: 'Name cannot be empty' });
+    }
+    if (name !== undefined && name.length > 100) {
+      return res.status(400).json({ success: false, message: 'Name is too long' });
+    }
+    if (phone !== undefined && phone.length > 20) {
+      return res.status(400).json({ success: false, message: 'Phone number is too long' });
+    }
+    if (address !== undefined && address.length > 255) {
+      return res.status(400).json({ success: false, message: 'Address is too long' });
+    }
+
+    const updateData: any = {};
+    if (name !== undefined) updateData.name = name;
+    if (phone !== undefined) updateData.phone = phone || null;
+    if (address !== undefined) updateData.address = address || null;
+
+    const user = await prisma.user.update({
+      where: { id: req.user.id },
+      data: updateData,
+      select: { id: true, name: true, email: true, phone: true, address: true, role: true }
+    });
+    res.json({ success: true, data: user, message: 'Profile updated' });
+  } catch (error) {
+    console.error('Update profile error:', error);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 });
@@ -566,15 +606,38 @@ app.get('/api/reports/sales', requireAdmin, async (req, res) => {
 });
 
 // Customers endpoint for Admin dashboard
-app.get('/api/admin/customers', requireAdmin, async (req, res) => {
+app.get('/api/customers', requireAdmin, async (req, res) => {
   try {
     const customers = await prisma.user.findMany({
       where: { role: 'CUSTOMER' },
-      select: { id: true, name: true, email: true, phone: true, role: true, createdAt: true },
+      select: { id: true, name: true, email: true, phone: true, address: true, role: true, points: true, is_active: true, createdAt: true },
       orderBy: { createdAt: 'desc' }
     });
-    res.json({ success: true, data: customers, message: 'Customers fetched' });
+    res.json({ success: true, data: { customers }, message: 'Customers fetched' });
   } catch (error) {
+    console.error('Fetch customers error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+app.get('/api/customers/:id', requireAdmin, async (req, res) => {
+  try {
+    const customer = await prisma.user.findUnique({
+      where: { id: req.params.id },
+      select: { 
+        id: true, name: true, email: true, phone: true, address: true, role: true, points: true, is_active: true, createdAt: true,
+        orders: { orderBy: { createdAt: 'desc' } },
+        reservations: { orderBy: { createdAt: 'desc' } }
+      }
+    });
+    
+    if (!customer || customer.role !== 'CUSTOMER') {
+      return res.status(404).json({ success: false, message: 'Customer not found' });
+    }
+    
+    res.json({ success: true, data: customer, message: 'Customer details fetched' });
+  } catch (error) {
+    console.error('Fetch customer error:', error);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 });

@@ -189,9 +189,15 @@ export const adminApi = {
 
   // Customers
   getCustomers: (params?: { search?: string; status?: string; page?: number; limit?: number }) =>
-    adminClient.get<{ success: boolean; data: { customers: AdminCustomer[]; pagination: any } }>('/customers', { params }),
+    axios.get<{ success: boolean; data: { customers: AdminCustomer[]; pagination: any } }>(
+      `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/customers`, 
+      { params, headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
+    ),
   getCustomer: (id: string) =>
-    adminClient.get<{ success: boolean; data: any }>(`/customers/${id}`),
+    axios.get<{ success: boolean; data: any }>(
+      `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/customers/${id}`,
+      { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
+    ),
   toggleCustomer: (id: string) =>
     adminClient.patch<{ success: boolean; data: AdminCustomer; message: string }>(`/customers/${id}/toggle`),
   adjustCustomerPoints: (id: string, delta: number, reason: string) =>
